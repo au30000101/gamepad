@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh" class="no-js demo-1">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0;"> 
+		<script src="./js/jquery-3.1.1.js"></script>
+		<script src="./js/socket.io.js"></script>
+		<style type="text/css">
+			html {
+				font-size: 100px;
+			}
+			html,body {
+				padding: 0px;
+				margin: 0px;
+				height: 100%;
+			}
+			body {
+				font-size: 0.12rem;
+				-moz-user-select: none;
+				-webkit-user-select: none;
+				-ms-user-select: none;
+				-khtml-user-select: none;
+				user-select: none;
+			}
+			.gamepad_wrap {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				margin-left: -3.68rem;
+				margin-top: -1.56rem;
+				width: 7.36rem;
+				height: 3.12rem;
+				background: url('images/bg.png') no-repeat center center/100% 100%;
+			}
+			.gamepad {
+				width: 100%;
+				height: 100%;
+			}
+			.direction {
+				float: left;
+				width: 1.37rem;
+				margin-left: 0.51rem;
+				margin-top: 1.31rem;
+				height: 1.36rem;
+				background: url(images/direction.png) center center/100% 100%;
+			}
+			.buttons {
+				width: 2.20rem;
+				height: 2.19rem;
+				margin-top: 0.54rem;
+				margin-right: 0.31rem;
+				float: right;
+				background: url(images/buttons.png) center center/100% 100%;
+			}
+			.function {
+				width: 1.62rem;
+				height: .72rem;
+				position: absolute;
+				top: 1.81rem;
+				left: 2.88rem;
+				display:-moz-box; /* Firefox */
+				display:-webkit-box; /* Safari and Chrome */
+				display:box;
+				font-size: 0.5rem;
+				background: url(images/function.png) center center/100% 100%;
+			}
+			.function .select,
+			.function .start {
+				-moz-box-flex:1.0; /* Firefox */
+				-webkit-box-flex:1.0; /* Safari 和 Chrome */
+				box-flex:1.0;
+				height: 100%;
+				text-align: center;
+				border-radius: 3px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="main gamepad_wrap">
+				<div class="gamepad">
+					<div class="direction">
+					</div>
+					<div class="function">
+						<div class="select"></div>
+						<div class="start"></div>
+					</div>
+					<div class="buttons">
+					</div>
+				</div>
+				<div class="cl"></div>
+			</div>
+			
+		</div>
+
+		<script type="text/javascript">
+			(function($) {
+				// websocket 
+				var socket;
+
+				+function(){
+					// preload img, prevent from flashing
+					function loadImage(url) { 
+						var img = new Image(); //创建一个Image对象，实现图片的预下载 
+						img.src = url; 
+					}; 
+					var imgList = ['X','B','Y','A','up','down','left','right'];
+					for (var i = 0; i < imgList.length; i++) {
+						loadImage('./images/' + imgList[i] + ".png")
+					}
+				}();
+
+				window.gamepad = function(address){
+					var address = address || "";
+					socket = io(address);
+				
+					// square button set class
+					function ButtonSet($target, buttonList) {
+						// jquery el for button set
+						this.$target = $target;
+						// preButton used for reset
+						this.preButton = undefined;
+						this.centrePoint = {
+							x: this.$target.offset().left + this.$target.width() / 2,
+							y: this.$target.offset().top + this.$target.height() / 2,
+						};
+
+						// image eles and emit eles have the same name. 
+						this.buttonList = buttonList;
+					}
+					ButtonSet.prototype = {
+						resetCenterePoint: function() {
+							this.centrePoint = {
+								x: this.$target.offset().left + this.$target.width() / 2,
+								y: this.$target.offset().top + this.$target.height() / 2,
+							};
+						},
+						// the  effects and events of trigger
+						triggerEvent : function(triggerButton, isEnd, movingModel) {
+							if(!isEnd){
+
+								this.$target.css({
+									'background-image': 'url(./images/' + triggerButton +'.png)'
+								})
+								if(this.preButton != triggerButton) {
+									socket.emit('end '+ this.preButton);
+		  							console.log('end '+ this.preButton);
+									this.preButton = triggerButton;
+									socket.emit(triggerButton);
+		  							console.log(triggerButton);
+								}
+								if (!movingModel){
+									socket.emit(triggerButton);
+		  							console.log( triggerButton);
+								}
+							}else {
+								this.$target.css({
+									'background-image': ''
+								})
+								socket.emit('end ' + triggerButton);
+		  						console.log('end ' + triggerButton);
+			  				}
+			  			},
+
+						// check positions of touches
+						checkPosition : function(position, isEnd, movingModel){
+							// absolute distance to centre point;
+							var distanceTocentreX = Math.abs(position.clientX - this.centrePoint.x);
+							var distanceTocentreY = Math.abs(position.clientY - this.centrePoint.y);
+
+							// when a touch occurs at top.
+			  				if(position.clientY < this.centrePoint.y ){
+			  					//  at top left
+			  					if(this.centrePoint.x > position.clientX){
+			  						// less than 20 return, in case buttons too sensitive;
+			  						if(distanceTocentreY < 20 && distanceTocentreX < 20) return;
+			  						// which direction is closer;
+			  						if(distanceTocentreY > distanceTocentreX) {
+			  							this.triggerEvent(this.buttonList[0], isEnd, movingModel);
+			  						} else {
+			  							this.triggerEvent(this.buttonList[2], isEnd, movingModel);
+			  						}
+			  					//  at top right
+			  					} else {
+			  						// less than 20 return, in case buttons too sensitive;
+			  						if(distanceTocentreY < 20 && distanceTocentreX < 20) return;
+			  						// which direction is closer;
+			  						if(distanceTocentreY > distanceTocentreX) {
+			  							this.triggerEvent(this.buttonList[0], isEnd, movingModel);
+			  						} else {
+			  							this.triggerEvent(this.buttonList[3], isEnd, movingModel);
+			  						}
+			  					}
+
+							// when a touch occurs at bottom.
+			  				} else {
+			  					//  at bottom left
+			  					if(this.centrePoint.x > position.clientX){
+			  						
+			  						// less than 15 return, in case buttons too sensitive;
+			  						if(distanceTocentreY < 15 && distanceTocentreX < 15) return;
+
+			  						if(distanceTocentreY > distanceTocentreX) {
+			  							this.triggerEvent(this.buttonList[1], isEnd, movingModel);
+			  						} else {
+			  							this.triggerEvent(this.buttonList[2], isEnd, movingModel);
+			  						}
+			  					//  at bottom right
+			  					} else {
+			  						
+			  						// less than 15 return, in case buttons too sensitive;
+			  						if(distanceTocentreY < 15 && distanceTocentreX < 15) return;
+
+			  						if(distanceTocentreY > distanceTocentreX) {
+			  							this.triggerEvent(this.buttonList[1], isEnd, movingModel);
+			  						} else {
+			  							this.triggerEvent(this.buttonList[3], isEnd, movingModel);
+			  						}
+			  					}
+			  				}
+
+						}
+					}
+
+					// event binding
+					var buttonSetDirection = new ButtonSet($('.direction'), ['up','down','left','right']);
+					var buttonSetButtons = new ButtonSet($('.buttons'), ['X','B','Y','A']);
+
+					// with reseting rem, shape gamepad
+					$(window).resize(function(){
+						$('html').css({
+							'font-size': ($('body').width() * 100 / 736),
+						})
+						buttonSetDirection.resetCenterePoint();
+						buttonSetButtons.resetCenterePoint();
+					}).resize();
+
+					// events bind
+					$('.gamepad').on('touchstart', function(event){
+		  				var position = event.changedTouches[event.changedTouches.length -1];
+
+		  				if(position.clientX >= $('.buttons').offset().left){
+			  				buttonSetButtons.checkPosition(position, false);
+		  				} else {
+			  				buttonSetDirection.checkPosition(position, false);
+		  				}
+			  			
+					});
+					$('.gamepad').on('touchmove', function(event){
+		  				event.preventDefault();
+		  				var position = event.changedTouches[event.changedTouches.length - 1];
+		  				if(position.clientX >= $('.buttons').offset().left){
+			  				buttonSetButtons.checkPosition(position, false, true);
+		  				} else {
+			  				buttonSetDirection.checkPosition(position, false, true);
+		  				}
+					}); 
+
+					$('.gamepad').on('touchend', function(event){
+
+		  				var position = event.changedTouches[event.changedTouches.length - 1];
+		  				if(position.clientX >= $('.buttons').offset().left){
+			  				buttonSetButtons.checkPosition(position, true);
+		  				} else {
+			  				buttonSetDirection.checkPosition(position, true);
+		  				}
+			  		});
+
+					$('.select').on('touchstart', function(event){
+		  				event.stopPropagation();
+		  				event.preventDefault();
+		  				socket.emit('select');
+		  				console.log('select');
+					});
+					$('.select').on('touchend',  function(event){
+		  				event.stopPropagation();
+		  				event.preventDefault();
+		  				socket.emit('end select');
+		  				console.log('end select');
+					});
+					$('.start').on('touchstart', function(event){
+		  				event.stopPropagation();
+		  				event.preventDefault();
+		  				socket.emit('start');
+		  				console.log('start');
+					});
+					$('.start').on('touchend',  function(event){
+		  				event.stopPropagation();
+		  				event.preventDefault();
+		  				socket.emit('end start');
+		  				console.log('end start');
+					});
+				}
+			})(jQuery);
+			gamepad();
+		</script>
+	</body>
+</html>
