@@ -12,7 +12,7 @@ var player2 = null;//玩家2
 var prop = null;
 var enemyArray = [];//敌方坦克
 var bulletArray = [];//子弹数组
-var keys = [];//记录按下的按键
+var keys = {};//记录按下的按键
 var crackArray = [];//爆炸数组
 
 var gameState = GAME_STATE_MENU;//默认菜单状态
@@ -27,8 +27,6 @@ var overY = 384;
 var emenyStopTime = 0;
 var homeProtectedTime = -1;
 var propTime = 500;
-var player1Life = 3;
-var player2Life =3;
 $(document).ready(function(){
 	
 	initScreen();
@@ -36,6 +34,32 @@ $(document).ready(function(){
 	player2 = new PlayTank(tankCtx);
 	initObject();
 	
+	socket.emit('create a game')
+	socket.on('select', function(index){
+		switch(gameState){
+	
+		case GAME_STATE_MENU:
+			menu.ready(index);
+			console.log('player ' + index + ' is ready');
+			break;
+		case GAME_STATE_START:
+			console.log(index);
+			if(index == 0) {
+				console.log(player1)
+				if(player2.lives > 0){
+					player1.lives++;
+					player2.lives--;
+				}
+			} else {
+				if(player1.lives > 0){
+					player2.lives++;
+					player1.lives--;
+				}
+
+			}
+			break;
+		}
+	});
 	setInterval(gameLoop,17);
 });
 
@@ -71,6 +95,8 @@ function initObject(){
 	player2.offsetX = 128; //player2的图片x与图片1相距128
 	player2.x = 256 + map.offsetX;
 	player2.y = 385 + map.offsetY;
+	player1.isShooting = false;
+	player2.isShooting = false;
 	appearEnemy = 0; //已出现的敌方坦克
 	enemyArray = [];//敌方坦克
 	bulletArray = [];//子弹数组
@@ -90,8 +116,7 @@ function gameLoop(){
 	
 	case GAME_STATE_MENU:
 		menu.draw();
-		break;
-	case GAME_STATE_CONNECT:
+
 		break;
 	case GAME_STATE_INIT:
 		stage.draw();
@@ -111,7 +136,7 @@ function gameLoop(){
 		}
 		break;
 	case GAME_STATE_WIN:
-		setTimeout(nextLevel, 1000);
+		nextLevel();
 		break;
 	case GAME_STATE_OVER:
 		gameOver();
@@ -121,42 +146,8 @@ function gameLoop(){
 
 $(document).keydown(function(e){
 	switch(gameState){
-	case GAME_STATE_MENU:
-		if(e.keyCode == keyboard.ENTER){
-			gameState = GAME_STATE_CONNECT;
-			console.log('create a game')
-			socket.emit('create a game');
-			socket.on('gameStart', function(){
-				gameState = GAME_STATE_INIT;
-				console.log('game start!');
-			})
-			//只有一个玩家
-			if(menu.playNum == 1){
-				player2.lives = 0;
-			}
-		}else{
-			var n = 0;
-			if(e.keyCode == keyboard.DOWN){
-				n = 1;
-			}else if(e.keyCode == keyboard.UP){
-				n = -1;
-			}
-			menu.next(n);
-		}
-		break;
-	case GAME_STATE_CONNECT:
-		break;
 	case GAME_STATE_START:
-		if(!keys.contain(e.keyCode)){
-			console.log(e.keyCode)
-			keys.push(e.keyCode);
-		}
-		//射击
-		if(e.keyCode == keyboard.SPACE && player1.lives > 0){
-			player1.shoot(BULLET_TYPE_PLAYER);
-		}else if(e.keyCode == keyboard.ENTER && player2.lives > 0){
-			player2.shoot(BULLET_TYPE_ENEMY);
-		}else if(e.keyCode == keyboard.N){
+		if(e.keyCode == keyboard.N){
 			nextLevel();
 		}else if(e.keyCode == keyboard.P){
 			preLevel();
@@ -165,6 +156,13 @@ $(document).keydown(function(e){
 	}
 });
 
+socket.on('start', function(){
+	gameState = GAME_STATE_INIT;
+	console.log('game init!');
+	if(menu.playNum == 1){
+		player2.lives = 0;
+	}
+})
 socket.on('shoot', function(msg){
 	if(gameState == GAME_STATE_START){
 		switch(msg){
@@ -468,6 +466,8 @@ function gameOver(){
 	overCtx.drawImage(RESOURCE_IMAGE,POS["over"][0],POS["over"][1],64,32,overX+map.offsetX,overY+map.offsetY,64,32);
 	overY -= 2 ;
 	if(overY <= parseInt(map.mapHeight/2)){
+		player1 = new PlayTank(tankCtx);
+		player2 = new PlayTank(tankCtx);
 		initObject();
 		//只有一个玩家
 		if(menu.playNum == 1){
@@ -483,10 +483,10 @@ function nextLevel(){
 		level = 1;
 	}
 	initObject();
-	// //只有一个玩家
-	// if(menu.playNum == 1){
-	// 	player2.lives = 0;
-	// }
+	//只有一个玩家
+	if(menu.playNum == 1){
+		player2.lives = 0;
+	}
 	stage.init(level);
 	gameState = GAME_STATE_INIT;
 }

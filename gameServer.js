@@ -20,27 +20,40 @@ var links = {
 	player: [],
 };
 io.on('connection', function(socket) {
-	socket.on('create a game', function(msg){
+	socket.on('create a game', function(){
 		links.PC = socket;
-		links.player = [];
-		console.log('create a new game.');
-	});
+		links.player = [],
+		console.log('host computer has already create, at ' + links.PC);
+		
+	})
 	socket.on('disconnect', function(){
+		var player = links.player.indexOf(socket);
+		links.player[player] = null;
   		socket.broadcast.emit('user exit');
 	});
 	socket.on('select', function(){
-		console.log(links.player.indexOf(socket))
 		if(links.player.indexOf(socket) < 0){
 			links.player.push(socket);
+			console.log('player ' + player + ' select.');
 		}
-		console.log('select');
-
-		if(links.player.length == 2) {
-			console.log('game starts')
-			links.PC.emit('gameStart');
+		var player = links.player.indexOf(socket);
+		if(!!links.PC){
+			links.PC.emit('select', player); 
 		}
 	});
 
+	socket.on('start', function(){
+		console.log('game starts')
+		links.PC.emit('start');
+	});
+	socket.on('end start', function(){
+		console.log('end start');
+		links.PC.emit('end start');
+	});
+	socket.on('end select', function(){
+		console.log('end select');
+		links.PC.emit('end start');
+	});
 	socket.on('up', function(){
 		var player = links.player.indexOf(socket);
 		console.log('up')
@@ -91,31 +104,10 @@ io.on('connection', function(socket) {
 	socket.on('end A', function(){
 		console.log('end A');
 		var player = links.player.indexOf(socket);
-		links.PC.emit('shoot',player);
+		links.PC.emit('shoot', player);
 	});
 	socket.on('end B', function(){
 		console.log('end B');
-	});
-	socket.on('X', function(){
-		console.log('X');
-	});
-	socket.on('Y', function(){
-		console.log('Y');
-	});
-	socket.on('A', function(){
-		console.log('A');
-	});
-	socket.on('B', function(){
-		console.log('B');
-	});
-	socket.on('end start', function(){
-		console.log('end start');
-	});
-	socket.on('end select', function(){
-		console.log('end select');
-	});
-	socket.on('start', function(){
-		console.log('start');
 	});
 });
 

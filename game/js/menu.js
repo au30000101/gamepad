@@ -7,8 +7,9 @@ var Menu = function(context){
 	this.x = 0;
 	this.y = SCREEN_HEIGHT;
 	this.selectTank = new SelectTank();
-	this.playNum = 1;
+	this.playNum = 0;
 	this.times = 0;
+	this.players = [false,false,false,false];
 	
 	/**
 	 * 画菜单
@@ -30,21 +31,26 @@ var Menu = function(context){
 		this.ctx.save(); 
 		//画背景
 		this.ctx.drawImage(MENU_IMAGE, this.x, this.y);
-		//画选择坦克
-		this.ctx.drawImage(RESOURCE_IMAGE,POS["selectTank"][0],POS["selectTank"][1] + temp,this.selectTank.size,this.selectTank.size,
-				this.selectTank.x,this.y + this.selectTank.ys[this.playNum-1],this.selectTank.size,this.selectTank.size);
+		for(var i = 0; i < this.players.length; i++) {
+			if(this.players[i]){
+				this.ctx.drawImage(RESOURCE_IMAGE,POS["selectTank"][0],POS["selectTank"][1] + temp,this.selectTank.size,this.selectTank.size,
+				this.selectTank.x,this.y + this.selectTank.ys[i],this.selectTank.size,this.selectTank.size);
+			}
+		}
+		
+
 		this.ctx.restore();
 	};
 	
 	/**
 	 * 选择坦克上下移动
 	 */
-	this.next = function(n){
-		this.playNum += n;
-		if(this.playNum > 2){
-			this.playNum = 1;
-		}else if(this.playNum < 1){
-			this.playNum = 2;
+	this.ready = function(n){
+		this.players[n] = true;
+		for(var i = 0; i < this.players.length; i++) {
+			if(this.players[i]){
+				this.playNum++;
+			}
 		}
 	};
 };

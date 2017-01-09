@@ -162,7 +162,7 @@ var Tank = function(){
  * @returns
  */
 var SelectTank = function(){
-	this.ys = [250, 281];//两个Y坐标，分别对应1p和2p
+	this.ys = [250, 281,312, 343];//两个Y坐标，分别对应1p和2p
 	this.x = 140;
 	this.size = 27;
 };

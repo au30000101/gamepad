@@ -116,7 +116,7 @@ var Bullet = function(context,owner,type,dir, bulletSpeed, cannon){
 		this.isDestroyed = true;
 		crackArray.push(new CrackAnimation(CRACK_TYPE_BULLET,this.ctx,this));
 		if(!this.owner.isAI){
-			BULLET_DESTROY_AUDIO.play();
+			// BULLET_DESTROY_AUDIO.play();
 		}
 	};
 	
