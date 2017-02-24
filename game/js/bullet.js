@@ -88,6 +88,28 @@ var Bullet = function(context,owner,type,dir, bulletSpeed, cannon){
 						}
 					}
 				}
+				
+				if(player1.lives > 0 && CheckIntersect(this,player1,0)){
+					if(!player1.isProtected && !player1.isDestroyed){
+						player1.hitedByFriend();
+					}
+					this.hit = true;
+				}else if(player2.lives > 0 && CheckIntersect(this,player2,0)){
+					if(!player2.isProtected && !player2.isDestroyed){
+						player2.hitedByFriend();
+					}
+					this.hit = true;
+				}else if(player3.lives > 0 && CheckIntersect(this,player3,0)){
+					if(!player3.isProtected && !player3.isDestroyed){
+						player3.hitedByFriend();
+					}
+					this.hit = true;
+				}else if(player4.lives > 0 && CheckIntersect(this,player4,0)){
+					if(!player4.isProtected && !player4.isDestroyed){
+						player4.hitedByFriend();
+					}
+					this.hit = true;
+				}
 			}else if(this.type == BULLET_TYPE_ENEMY){
 				if(player1.lives > 0 && CheckIntersect(this,player1,0)){
 					if(!player1.isProtected && !player1.isDestroyed){
@@ -97,6 +119,16 @@ var Bullet = function(context,owner,type,dir, bulletSpeed, cannon){
 				}else if(player2.lives > 0 && CheckIntersect(this,player2,0)){
 					if(!player2.isProtected && !player2.isDestroyed){
 						player2.distroy();
+					}
+					this.hit = true;
+				}else if(player3.lives > 0 && CheckIntersect(this,player3,0)){
+					if(!player3.isProtected && !player3.isDestroyed){
+						player3.distroy();
+					}
+					this.hit = true;
+				}else if(player4.lives > 0 && CheckIntersect(this,player4,0)){
+					if(!player4.isProtected && !player4.isDestroyed){
+						player4.distroy();
 					}
 					this.hit = true;
 				}

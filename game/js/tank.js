@@ -12,6 +12,7 @@ var Tank = function(){
 	this.hit = false; //是否碰到墙或者坦克
 	this.isAI = false; //是否自动
 	this.isShooting = 0;//子弹是否在运行中
+	this.stopTime = 0;
 	this.bullet = null;//子弹
 	this.bulletExtra = null;
 	this.shootRate = 0.6;//射击的概率
@@ -39,20 +40,22 @@ var Tank = function(){
 				this.frame = 0;
 			}
 		}
-		if(this.dir == UP){
-			this.tempY -= this.speed;
-		}else if(this.dir == DOWN){
-			this.tempY += this.speed;
-		}else if(this.dir == RIGHT){
-			this.tempX += this.speed;
-		}else if(this.dir == LEFT){
-			this.tempX -= this.speed;
+		if(this.stopTime <= 0) {
+			if(this.dir == UP){
+				this.tempY -= this.speed;
+			}else if(this.dir == DOWN){
+				this.tempY += this.speed;
+			}else if(this.dir == RIGHT){
+				this.tempX += this.speed;
+			}else if(this.dir == LEFT){
+				this.tempX -= this.speed;
+			}
 		}
-		this.isHit();
+		this.isHit(); 
 		if(!this.hit){
 			this.x = this.tempX;
 			this.y = this.tempY;
-		}
+		} 
 	};
 	
 	/**
@@ -87,16 +90,28 @@ var Tank = function(){
 				this.hit = true;
 			}
 		}
-		//坦克检测
-		/*if(enemyArray != null && enemyArray.length >0){
-			var enemySize = enemyArray.length;
-			for(var i=0;i<enemySize;i++){
-				if(enemyArray[i] != this && CheckIntersect(enemyArray[i],this,0)){
-					this.hit = true;
-					break;
-				}
+		if(!this.hit){
+			//坦克检测
+			var tanks = [];
+			for(var i = 0; i <enemyArray.length;i++) {
+				tanks[i]= enemyArray[i];
 			}
-		}*/
+			if(player1.lives > 0) {
+				tanks.push(player1);
+			}
+			if(player2.lives > 0) {
+				tanks.push(player2);
+			}
+			if(player3.lives > 0) {
+				tanks.push(player3);
+			}
+			if(player4.lives > 0) {
+				tanks.push(player4);
+			}
+			if(tanksCollision(this, tanks)){
+				this.hit = true;
+			}
+		}
 	};
 	
 	/**
@@ -117,7 +132,10 @@ var Tank = function(){
 		}else{
 			var tempX = this.x;
 			var tempY = this.y;
-			this.bullet = new Bullet(this.ctx,this,type,this.dir, this.bulletSpeed, this.cannon);
+			this.bullet = new Bullet(this.ctx,this,type,this.dir, this.bulletSpeed);
+			if( this.cannon) {
+				this.bullet2 = new Bullet(this.ctx,this,type,this.dir, this.bulletSpeed);
+			}
 			if(this.dir == UP){
 				tempX = this.x + parseInt(this.size/2) - parseInt(this.bullet.size/2);
 				tempY = this.y - this.bullet.size;
@@ -162,8 +180,8 @@ var Tank = function(){
  * @returns
  */
 var SelectTank = function(){
-	this.ys = [250, 281,312, 343];//两个Y坐标，分别对应1p和2p
-	this.x = 140;
+	this.ys = [267, 267, 313, 313];//两个Y坐标，分别对应1p和2p
+	this.xs = [65, 255, 65, 255];
 	this.size = 27;
 };
 
@@ -179,12 +197,14 @@ var PlayTank = function(context){
 	this.lives = 3;//生命值
 	this.isProtected = true;//是否受保护
 	this.protectedTime = 500;//保护时间
+	this.stopTime = 0;//保护时间
 	this.offsetX = 0;//坦克2与坦克1的距离
+	this.offsetY = 0;//坦克2与坦克1的距离
 	this.speed = 2;//坦克的速度
 	
 	this.draw = function(){
 		this.hit = false;
-		this.ctx.drawImage(RESOURCE_IMAGE,POS["player"][0]+this.offsetX+this.dir*this.size,POS["player"][1],this.size,this.size,this.x,this.y,this.size,this.size);
+		
 		if(this.isProtected){
 			var temp = parseInt((500-this.protectedTime)/5)%2;
 			this.ctx.drawImage(RESOURCE_IMAGE,POS["protected"][0],POS["protected"][1]+32*temp,32, 32,this.x,this.y,32, 32);
@@ -192,6 +212,16 @@ var PlayTank = function(context){
 			if(this.protectedTime == 0){
 				this.isProtected = false;
 			}
+		}
+		if(this.stopTime > 0) {
+			var temp = this.stopTime%30;
+			console.log(temp);
+			if(temp < 7){
+				this.ctx.drawImage(RESOURCE_IMAGE,POS["player"][0]+this.offsetX+this.dir*this.size,POS["player"][1] + this.offsetY,this.size,this.size,this.x,this.y,this.size,this.size);
+			}
+			this.stopTime--;
+		} else {
+			this.ctx.drawImage(RESOURCE_IMAGE,POS["player"][0]+this.offsetX+this.dir*this.size,POS["player"][1] + this.offsetY,this.size,this.size,this.x,this.y,this.size,this.size);
 		}
 		
 	};
@@ -201,7 +231,9 @@ var PlayTank = function(context){
 		crackArray.push(new CrackAnimation(CRACK_TYPE_TANK,this.ctx,this));
 		PLAYER_DESTROY_AUDIO.play();
 	};
-	
+	this.hitedByFriend = function() {
+		this.stopTime = 100;
+	}
 	this.renascenc = function(player){
 		this.lives-- ;
 		this.cannon = false;
@@ -211,10 +243,14 @@ var PlayTank = function(context){
 		this.protectedTime = 500;
 		this.isDestroyed = false;
 		var temp= 0 ;
-		if(player == 1){
+		if (player == 1) {
 			temp = 129;
-		}else{
+		}else if (player == 2){
 			temp = 256;
+		}else if (player == 3){
+			temp = 0;
+		}else {
+			temp = 386;
 		}
 		this.x = temp + map.offsetX;
 		this.y = 385 + map.offsetY;
@@ -234,7 +270,7 @@ var EnemyOne = function(context){
 	this.times = 0;
 	this.lives = 1;
 	this.isAI = true;
-	this.speed = 1.5;
+	this.speed = 2;
 	
 	this.draw = function(){
 		this.times ++;
@@ -279,7 +315,7 @@ var EnemyTwo = function(context){
 	this.times = 0;
 	this.lives = 2;
 	this.isAI = true;
-	this.speed = 1;
+	this.speed = 1.5;
 	
 	this.draw = function(){
 		this.times ++;
@@ -321,7 +357,7 @@ var EnemyThree = function(context){
 	this.times = 0;
 	this.lives = 3;
 	this.isAI = true;
-	this.speed = 0.5;
+	this.speed = 1;
 	
 	this.draw = function(){
 		this.times ++;

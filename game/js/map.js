@@ -55,15 +55,18 @@ var Map = function(wCtx,gCtx){
 		this.drawLevel();
 		this.drawLives(0,1);
 		this.drawLives(0,2);
+		this.drawLives(0,3);
+		this.drawLives(0,4);
 	};
 	
 	/**
 	 * 画固定不变的部分
 	 */
 	this.drawNoChange = function(){
-		this.wallCtx.drawImage(RESOURCE_IMAGE, POS["score"][0], POS["score"][1], 30, 32, 464, 256, 30, 32);//player1
-		
-		this.wallCtx.drawImage(RESOURCE_IMAGE, 30 + POS["score"][0], POS["score"][1], 30, 32, 464, 304, 30, 32);//player2
+		this.wallCtx.drawImage(RESOURCE_IMAGE, POS["score"][0], POS["score"][1], 14, 16, 464, 220, 14, 16);//player1
+		this.wallCtx.drawImage(RESOURCE_IMAGE, POS["score"][0] + 15, POS["score"][1], 14, 16, 464, 250, 14, 16);//player2
+		this.wallCtx.drawImage(RESOURCE_IMAGE, POS["score"][0] + 30, POS["score"][1], 14, 16, 464, 280, 14, 16);//player3
+		this.wallCtx.drawImage(RESOURCE_IMAGE, POS["score"][0] + 45, POS["score"][1], 14, 16, 464, 310, 14, 16);//player3
 		//30,32旗帜的size, 464, 352旗帜在canvas中位置
 		this.wallCtx.drawImage(RESOURCE_IMAGE, 60 + POS["score"][0], POS["score"][1], 30, 32, 464, 352, 32, 30);//画旗帜
 	};
@@ -83,6 +86,7 @@ var Map = function(wCtx,gCtx){
 		var x = 466;
 		var y = 34;
 		var enemySize = 16;
+		enemyNum = enemyNum> 20? 20: enemyNum;
 		for(var i=1;i<=enemyNum;i++){
 			var tempX = x;
 			var tempY = y + parseInt((i+1)/2)*enemySize;
@@ -99,6 +103,8 @@ var Map = function(wCtx,gCtx){
 	 * @param enemyNum 已出现的敌方坦克数
 	 */
 	this.clearEnemyNum = function(totolEnemyNum,enemyNum){
+
+		if (totolEnemyNum - enemyNum > 20) return;
 		var x = 466;
 		var y = 34 + this.offsetY;
 		if(enemyNum <= 0){
@@ -114,13 +120,19 @@ var Map = function(wCtx,gCtx){
 	/**
 	 * 画坦克的生命数
 	 * @param lives 生命数
-	 * @param which 坦克索引，1、代表玩家1  2、代表玩家2
+	 * @param which 坦克索引，
 	 */
 	this.drawLives = function(lives,which){
 		var x = 482;
-		var y = 272;
+		var y = 222;
 		if(which == 2){
-			y = 320;
+			y = 252;
+		}
+		if(which == 3){
+			y = 282;
+		}
+		if(which == 4){
+			y = 312;
 		}
 		this.wallCtx.fillStyle = "#7f7f7f";
 		this.wallCtx.fillRect(x,y,this.num.size,this.num.size);

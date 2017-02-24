@@ -34,7 +34,7 @@ var Menu = function(context){
 		for(var i = 0; i < this.players.length; i++) {
 			if(this.players[i]){
 				this.ctx.drawImage(RESOURCE_IMAGE,POS["selectTank"][0],POS["selectTank"][1] + temp,this.selectTank.size,this.selectTank.size,
-				this.selectTank.x,this.y + this.selectTank.ys[i],this.selectTank.size,this.selectTank.size);
+				this.selectTank.xs[i],this.y + this.selectTank.ys[i],this.selectTank.size,this.selectTank.size);
 			}
 		}
 		
@@ -47,6 +47,7 @@ var Menu = function(context){
 	 */
 	this.ready = function(n){
 		this.players[n] = true;
+		this.playNum = 0;
 		for(var i = 0; i < this.players.length; i++) {
 			if(this.players[i]){
 				this.playNum++;

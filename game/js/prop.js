@@ -39,6 +39,12 @@ var Prop = function(context){
 		}else if(player2.lives > 0 && CheckIntersect(this,player2,0)){
 			this.hit = true;
 			player = player2;
+		}else if(player3.lives > 0 && CheckIntersect(this,player3,0)){
+			this.hit = true;
+			player = player3;
+		}else if(player4.lives > 0 && CheckIntersect(this,player4,0)){
+			this.hit = true;
+			player = player4;
 		}
 		if(this.hit){
 			PROP_AUDIO.play();

@@ -111,6 +111,56 @@ function tankMapCollision(tank,mapobj){
 }
 
 /**
+ * 坦克与地图块碰撞
+ * @param tank 坦克对象
+ * @param mapobj 地图对象
+ * @returns {Boolean} 如果碰撞，返回true
+ */
+function tanksCollision(tank, tanks){
+	if(tank.dir == UP){
+		for(var i = 0; i< tanks.length; i ++) {
+			if(tanks[i] == tank) continue;
+			if(Math.abs(tanks[i].x - tank.x) < tank.size - 5) {
+				if( tank.y - tanks[i].y  > 0 && tank.y - tanks[i].y < tank.size) {
+					return true;
+				}
+			}
+		}
+	}
+	if(tank.dir == DOWN){
+		for(var i = 0; i< tanks.length; i ++) {
+			if(tanks[i] == tank) continue;
+			if(Math.abs(tanks[i].x - tank.x) <= tank.size - 5) {
+				if(tanks[i].y - tank.y > 0 && tanks[i].y - tank.y < tank.size) {
+					return true;
+				}
+			}
+		}
+	}
+	if(tank.dir == LEFT){
+		for(var i = 0; i< tanks.length; i ++) {
+			if(tanks[i] == tank) continue;
+			if(Math.abs(tanks[i].y - tank.y) <= tank.size - 5) {
+				if(tank.x - tanks[i].x  > 0 && tank.x - tanks[i].x  < tank.size) {
+					return true;
+				}
+			}
+		}
+	}
+	if(tank.dir == RIGHT){
+		for(var i = 0; i< tanks.length; i ++) {
+			if(tanks[i] == tank) continue;
+			if(Math.abs(tanks[i].y - tank.y) < tank.size - 5) {
+				if(tanks[i].x - tank.x > 0 && tanks[i].x - tank.x < tank.size) {
+					return true;
+				}
+			}
+		}
+	}
+	
+	return false;
+}
+/**
  * 子弹与地图块的碰撞
  * @param bullet 子弹对象
  * @param mapobj 地图对象

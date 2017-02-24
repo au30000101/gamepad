@@ -9,6 +9,8 @@ var stage = null;//舞台
 var map = null;//地图
 var player1 = null;//玩家1
 var player2 = null;//玩家2
+var player3 = null;//玩家1
+var player4 = null;//玩家2
 var prop = null;
 var enemyArray = [];//敌方坦克
 var bulletArray = [];//子弹数组
@@ -17,8 +19,8 @@ var crackArray = [];//爆炸数组
 
 var gameState = GAME_STATE_MENU;//默认菜单状态
 var level = 1;
-var maxEnemy = 20;//敌方坦克总数
-var maxAppearEnemy = 5;//屏幕上一起出现的最大数
+var maxEnemy = 40;//敌方坦克总数
+var maxAppearEnemy = 10;//屏幕上一起出现的最大数
 var appearEnemy = 0; //已出现的敌方坦克
 var mainframe = 0;
 var isGameOver = false;
@@ -32,6 +34,8 @@ $(document).ready(function(){
 	initScreen();
 	player1 = new PlayTank(tankCtx);
 	player2 = new PlayTank(tankCtx);
+	player3 = new PlayTank(tankCtx);
+	player4 = new PlayTank(tankCtx);
 	initObject();
 	
 	socket.emit('create a game')
@@ -43,19 +47,19 @@ $(document).ready(function(){
 			console.log('player ' + index + ' is ready');
 			break;
 		case GAME_STATE_START:
-			console.log(index);
-			if(index == 0) {
-				console.log(player1)
-				if(player2.lives > 0){
-					player1.lives++;
-					player2.lives--;
+			// borrow lives from other players
+			var mostLives = 0;
+			var mostLivesPlayer;
+			var players = [player1,player2, player3, player4];
+			for(var i = 0; i < 4; i ++) {
+				if(mostLives < players[i].lives) {
+					mostLives = players[i].lives
+					mostIndex = i;
 				}
-			} else {
-				if(player1.lives > 0){
-					player2.lives++;
-					player1.lives--;
-				}
-
+			}
+			if(mostLives > 0){
+				players[mostIndex].lives--;
+				players[index].lives++;
 			}
 			break;
 		}
@@ -95,8 +99,17 @@ function initObject(){
 	player2.offsetX = 128; //player2的图片x与图片1相距128
 	player2.x = 256 + map.offsetX;
 	player2.y = 385 + map.offsetY;
+	player3.offsetY = 232;
+	player3.x = 0 + map.offsetX;
+	player3.y = 385 + map.offsetY;
+	player4.offsetX = 128; //player2的图片x与图片1相距128
+	player4.offsetY = 232;
+	player4.x = 386 + map.offsetX;
+	player4.y = 385 + map.offsetY;
 	player1.isShooting = false;
 	player2.isShooting = false;
+	player3.isShooting = false;
+	player4.isShooting = false;
 	appearEnemy = 0; //已出现的敌方坦克
 	enemyArray = [];//敌方坦克
 	bulletArray = [];//子弹数组
@@ -126,7 +139,7 @@ function gameLoop(){
 		break;
 	case GAME_STATE_START:
 		drawAll();
-		if(isGameOver ||(player1.lives <=0 && player2.lives <= 0)){
+		if(isGameOver ||(player1.lives <=0 && player2.lives <= 0 && player3.lives <=0 && player4.lives <= 0)){
 			gameState = GAME_STATE_OVER;
 			map.homeHit();
 			PLAYER_DESTROY_AUDIO.play();
@@ -159,8 +172,22 @@ $(document).keydown(function(e){
 socket.on('start', function(){
 	gameState = GAME_STATE_INIT;
 	console.log('game init!');
-	if(menu.playNum == 1){
-		player2.lives = 0;
+	console.log(menu.playNum)
+	switch(menu.playNum) {
+		case 1:
+			player2.lives = 0;
+			player3.lives = 0;
+			player4.lives = 0;
+			break;
+		case 2:
+			player3.lives = 0;
+			player4.lives = 0;
+			break;
+		case 3:
+			player4.lives = 0;
+			break;
+		case 4:
+			break;
 	}
 })
 socket.on('shoot', function(msg){
@@ -175,6 +202,14 @@ socket.on('shoot', function(msg){
 				if(player2.lives > 0){
 					player2.shoot(BULLET_TYPE_PLAYER);
 				}
+			case 2:
+				if(player3.lives > 0){
+					player3.shoot(BULLET_TYPE_PLAYER);
+				}
+			case 3:
+				if(player4.lives > 0){
+					player4.shoot(BULLET_TYPE_PLAYER);
+				}
 				break;
 		}
 	}
@@ -183,7 +218,7 @@ socket.on('shoot', function(msg){
 });
 socket.on('up', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'up');
+		console.log('player '+ msg +' up');
 		switch(msg){
 			case 0:
 				if(!keys.contain(87)){
@@ -194,13 +229,22 @@ socket.on('up', function(msg){
 				if(!keys.contain(38)){
 					keys.push(38);
 				}
+			case 2:
+				if(!keys.contain(187)){
+					keys.push(187);
+				}
+				break;
+			case 3:
+				if(!keys.contain(138)){
+					keys.push(138);
+				}
 				break;
 		}
 	}
 })
 socket.on('down', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'down');
+		console.log('player '+ msg +' down');
 		switch(msg){
 			case 0:
 				if(!keys.contain(83)){
@@ -211,13 +255,22 @@ socket.on('down', function(msg){
 				if(!keys.contain(40)){
 					keys.push(40);
 				}
+			case 2:
+				if(!keys.contain(183)){
+					keys.push(183);
+				}
+				break;
+			case 3:
+				if(!keys.contain(140)){
+					keys.push(140);
+				}
 				break;
 		}
 	}
 })
 socket.on('left', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'left');
+		console.log('player '+ msg +' left');
 		switch(msg){
 			case 0:
 				if(!keys.contain(65)){
@@ -228,13 +281,22 @@ socket.on('left', function(msg){
 				if(!keys.contain(37)){
 					keys.push(37);
 				}
+			case 2:
+				if(!keys.contain(165)){
+					keys.push(165);
+				}
+				break;
+			case 3:
+				if(!keys.contain(137)){
+					keys.push(137);
+				}
 				break;
 		}
 	}
 })
 socket.on('right', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'right');
+		console.log('player '+ msg +' right');
 		switch(msg){
 			case 0:
 				if(!keys.contain(68)){
@@ -245,13 +307,22 @@ socket.on('right', function(msg){
 				if(!keys.contain(39)){
 					keys.push(39);
 				}
+			case 2:
+				if(!keys.contain(168)){
+					keys.push(168);
+				}
+				break;
+			case 3:
+				if(!keys.contain(139)){
+					keys.push(139);
+				}
 				break;
 		}
 	}
 })
 socket.on('endUp', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'end up');
+		console.log('player '+ msg +' end up');
 		switch(msg){
 			case 0:
 				keys.remove(87);
@@ -259,44 +330,65 @@ socket.on('endUp', function(msg){
 			case 1:
 				keys.remove(38);
 				break;
+			case 2:
+				keys.remove(187);
+				break;
+			case 3:
+				keys.remove(138);
+				break;
 		}
 	}
 })
 socket.on('endDown', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'end down');
+		console.log('player '+ msg +' end down');
 		switch(msg){
 			case 0:
 				keys.remove(83);
 				break;
 			case 1:
 				keys.remove(40);
+			case 2:
+				keys.remove(183);
+				break;
+			case 3:
+				keys.remove(140);
 				break;
 		}
 	}
 })
 socket.on('endLeft', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'end left');
+		console.log('player '+ msg +' end left');
 		switch(msg){
 			case 0:
 				keys.remove(65);
 				break;
 			case 1:
 				keys.remove(37);
+			case 2:
+				keys.remove(165);
+				break;
+			case 3:
+				keys.remove(137);
 				break;
 		}
 	}
 })
 socket.on('endRight', function(msg){
 	if(gameState == GAME_STATE_START){
-		console.log('player'+ msg +'end left');
+		console.log('player '+ msg +' end left');
 		switch(msg){
 			case 0:
 				keys.remove(68);
 				break;
 			case 1:
 				keys.remove(39);
+			case 2:
+				keys.remove(168);
+				break;
+			case 3:
+				keys.remove(139);
 				break;
 		}
 	}
@@ -311,6 +403,8 @@ function initMap(){
 function drawLives(){
 	map.drawLives(player1.lives,1);
 	map.drawLives(player2.lives,2);
+	map.drawLives(player3.lives,3);
+	map.drawLives(player4.lives,4);
 }
 
 function drawBullet(){
@@ -346,6 +440,24 @@ function keyEvent(){
 		player1.hit = false;
 		player1.move();
 	}
+
+	if(keys.contain(keyboard.W + 100)){
+		player3.dir = UP;
+		player3.hit = false;
+		player3.move();
+	}else if(keys.contain(keyboard.S + 100)){
+		player3.dir = DOWN;
+		player3.hit = false;
+		player3.move();
+	}else if(keys.contain(keyboard.A + 100)){
+		player3.dir = LEFT;
+		player3.hit = false;
+		player3.move();
+	}else if(keys.contain(keyboard.D + 100)){
+		player3.dir = RIGHT;
+		player3.hit = false;
+		player3.move();
+	}
 	
 	if(keys.contain(keyboard.UP)){
 		player2.dir = UP;
@@ -363,6 +475,24 @@ function keyEvent(){
 		player2.dir = RIGHT;
 		player2.hit = false;
 		player2.move();
+	}
+
+	if(keys.contain(keyboard.UP + 100)){
+		player4.dir = UP;
+		player4.hit = false;
+		player4.move();
+	}else if(keys.contain(keyboard.DOWN + 100)){
+		player4.dir = DOWN;
+		player4.hit = false;
+		player4.move();
+	}else if(keys.contain(keyboard.LEFT + 100)){
+		player4.dir = LEFT;
+		player4.hit = false;
+		player4.move();
+	}else if(keys.contain(keyboard.RIGHT + 100)){
+		player4.dir = RIGHT;
+		player4.hit = false;
+		player4.move();
 	}
 	
 }
@@ -414,6 +544,12 @@ function drawAll(){
 	if(player2.lives > 0){
 		player2.draw();
 	}
+	if(player3.lives > 0){
+		player3.draw();
+	}
+	if(player4.lives > 0){
+		player4.draw();
+	}
 	drawLives();
 	if(appearEnemy<maxEnemy){
 		if(mainframe % 100 == 0){
@@ -452,6 +588,10 @@ function drawCrack(){
 					player1.renascenc(1);
 				}else if(crackObj.owner == player2){
 					player2.renascenc(2);
+				}else if(crackObj.owner == player3){
+					player3.renascenc(3);
+				}else if(crackObj.owner == player4){
+					player4.renascenc(4);
 				}
 			}else{
 				crackObj.draw();
@@ -468,10 +608,25 @@ function gameOver(){
 	if(overY <= parseInt(map.mapHeight/2)){
 		player1 = new PlayTank(tankCtx);
 		player2 = new PlayTank(tankCtx);
+		player3 = new PlayTank(tankCtx);
+		player4 = new PlayTank(tankCtx);
 		initObject();
 		//只有一个玩家
-		if(menu.playNum == 1){
-			player2.lives = 0;
+		switch(menu.playNum) {
+			case 1:
+				player2.lives = 0;
+				player3.lives = 0;
+				player4.lives = 0;
+				break;
+			case 2:
+				player3.lives = 0;
+				player4.lives = 0;
+				break;
+			case 3:
+				player4.lives = 0;
+				break;
+			case 4:
+				break;
 		}
 		gameState = GAME_STATE_MENU;
 	}
@@ -484,8 +639,21 @@ function nextLevel(){
 	}
 	initObject();
 	//只有一个玩家
-	if(menu.playNum == 1){
-		player2.lives = 0;
+	switch(menu.playNum) {
+		case 1:
+			player2.lives = 0;
+			player3.lives = 0;
+			player4.lives = 0;
+			break;
+		case 2:
+			player3.lives = 0;
+			player4.lives = 0;
+			break;
+		case 3:
+			player4.lives = 0;
+			break;
+		case 4:
+			break;
 	}
 	stage.init(level);
 	gameState = GAME_STATE_INIT;
@@ -498,8 +666,21 @@ function preLevel(){
 	}
 	initObject();
 	//只有一个玩家
-	if(menu.playNum == 1){
-		player2.lives = 0;
+	switch(menu.playNum) {
+		case 1:
+			player2.lives = 0;
+			player3.lives = 0;
+			player4.lives = 0;
+			break;
+		case 2:
+			player3.lives = 0;
+			player4.lives = 0;
+			break;
+		case 3:
+			player4.lives = 0;
+			break;
+		case 4:
+			break;
 	}
 	stage.init(level);
 	gameState = GAME_STATE_INIT;

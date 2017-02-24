@@ -95,22 +95,18 @@
 		</div>
 
 		<script type="text/javascript">
+
+			// preload imgs
+			var imgList = ['X','B','Y','A','up','down','left','right'];
+			var img = [];
+			for (var i = 0; i < imgList.length; i++) {; 
+				img[i] = new Image();
+				img[i].src = './images/' + imgList[i] + ".png"; 
+			}
+			
 			(function($) {
 				// websocket 
 				var socket;
-
-				+function(){
-					// preload img, prevent from flashing
-					function loadImage(url) { 
-						var img = new Image(); //创建一个Image对象，实现图片的预下载 
-						img.src = url; 
-					}; 
-					var imgList = ['X','B','Y','A','up','down','left','right'];
-					for (var i = 0; i < imgList.length; i++) {
-						loadImage('./images/' + imgList[i] + ".png")
-					}
-				}();
-
 				window.gamepad = function(address){
 					var address = address || "";
 					socket = io(address);
