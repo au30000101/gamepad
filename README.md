@@ -24,7 +24,7 @@ A small project that people are able to play games together with their mobile ph
 
 ## Existing problems
 
-- Mess (I have no time to make codes clear and add comments).
+- Mess  .
 
 - Have no ready stage to syn all users.
 
