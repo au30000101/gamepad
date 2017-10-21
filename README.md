@@ -1,19 +1,21 @@
 # Gamepad
 
-##Overview
+## Overview
 
 A small project that people are able to play games together with their mobile phones + a screen(PC). It supports the maximum of 4 players at the same time. Techniques used in this project are mainly nodejs, socket.IO and Express.
 
 
-###PC end
+### PC end
 ![Play .gif animation](readme_img/Play.gif)
 
 
-###Mobile end
+### Mobile end
 ![Gamepad image](readme_img/gamepad.png)
 
+## Techniques and Setting
 
-Direction to use/play
+
+## Direction to use/play
 
 1.Open command line, entre the program folder type command "node GameServer.js"
 2.Visit http://localhost:3100/game on cumputer(mobile is fine as well).
