@@ -6,7 +6,7 @@ With socket.io and express, it makes any mobile device act as gamepad
 player can play at any place.
 it's a easy way to play with friends, very handy.
 
-
+![Play .gif animation](readme_img/play.gif)
 Direction to play
 
 1.Open command line, entre the program folder type command "node GameServer.js"
