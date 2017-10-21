@@ -10,7 +10,7 @@ A small project that people are able to play games together with their mobile ph
 
 
 ### Mobile end
-<img src="readme_img/gamepad.png" width="48">
+<img src="readme_img/gamepad.png" width="250">
 ## Techniques and Setting
 
 
