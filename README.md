@@ -24,10 +24,10 @@ A small project that people are able to play games together with their mobile ph
 
 ## Existing problems
 
-- Disorder (I have no time to make codes clear and add comments).
+- Mess (I have no time to make codes clear and add comments).
 
-- Having no ready phase to syn all users.
+- Have no ready stage to syn all users.
 
-- Press the button on mobile, you will see a problem with btn pictures.
+- Button images on the mobile end flashing.
 
 ....
