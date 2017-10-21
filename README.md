@@ -6,11 +6,11 @@ A small project that people are able to play games together with their mobile ph
 
 
 ### PC end
-![Play .gif animation](readme_img/Play.gif )
+![Play .gif animation](readme_img/Play.gif)
 
 
 ### Mobile end
-![Gamepad image](readme_img/gamepad.png=250x250)
+![Gamepad image](readme_img/gamepad.png = 250x)
 
 ## Techniques and Setting
 
