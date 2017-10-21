@@ -1,15 +1,19 @@
 # Gamepad
 
-Overview
+##Overview
 
-With socket.io and express, it makes any mobile device act as gamepad
-player can play at any place.
-it's a easy way to play with friends, very handy.
+A small project that people are able to play games together with their mobile phones + a screen(PC). It supports the maximum of 4 players at the same time. Techniques used in this project are mainly nodejs, socket.IO and Express.
 
+
+###PC end
 ![Play .gif animation](readme_img/Play.gif)
+
+
+###Mobile end
 ![Gamepad image](readme_img/gamepad.png)
 
-Direction to play
+
+Direction to use/play
 
 1.Open command line, entre the program folder type command "node GameServer.js"
 2.Visit http://localhost:3100/game on cumputer(mobile is fine as well).
