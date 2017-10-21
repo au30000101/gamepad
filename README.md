@@ -6,8 +6,8 @@ With socket.io and express, it makes any mobile device act as gamepad
 player can play at any place.
 it's a easy way to play with friends, very handy.
 
-[Play .gif animation](readme_img/Play.gif)
-[Gamepad image](readme_img/gamepad.png)
+![Play .gif animation](readme_img/Play.gif)
+![Gamepad image](readme_img/gamepad.png)
 
 Direction to play
 
