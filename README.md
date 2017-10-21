@@ -9,7 +9,7 @@ A small project that people are able to play games together with their mobile ph
 ![Play .gif animation](readme_img/Play.gif)
 
 ##### Mobile end
-<img src="readme_img/gamepad.png" width="250">
+<img src="readme_img/gamepad.png" width="341">
 
 ## Direction to use/play
 
