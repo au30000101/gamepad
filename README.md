@@ -17,7 +17,7 @@ A small project that people are able to play games together with their mobile ph
 
 - Visit http://localhost:3100/game on cumputer(mobile is fine as well).
 
-- Visit http://localhost:3100/gamepad/ on mobile browser.
+- Visit the PC through IP address + "gamepad" from mobile phone, like http://192.168.0.192:3100/gamepad/ in my case.
 
 - Press select and start. （if multiple players, press select to get ready, one player press start to begin the game）.
 
