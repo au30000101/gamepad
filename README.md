@@ -11,7 +11,7 @@ A small project that people are able to play games together with their mobile ph
 ##### Mobile end
 <img src="readme_img/gamepad.png" width="341">
 
-## Direction to use/play
+## Run the app
 
 - Open command line, entre the program folder type command "node GameServer.js"
 
@@ -22,12 +22,3 @@ A small project that people are able to play games together with their mobile ph
 - Press select and start. （if multiple players, press select to get ready, one player press start to begin the game）.
 
 
-## Existing problems
-
-- Mess  .
-
-- Have no ready stage to syn all users.
-
-- Button images on the mobile end flashing.
-
-....
